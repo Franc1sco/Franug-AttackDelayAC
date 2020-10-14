@@ -22,7 +22,7 @@
 
 #pragma newdecls required
 
-#define DATA "0.2"
+#define DATA "0.2.1"
 
 public Plugin myinfo = 
 {
@@ -59,6 +59,11 @@ public void OnPluginStart()
 			if (IsClientInGame(i))
 				OnClientPutInServer(i);
 	
+}
+
+public void OnMapStart()
+{
+	LoadKV();
 }
 
 public Action Event_PlayerSpawn(Event event, const char[] sName, bool bDontBroadcast)
