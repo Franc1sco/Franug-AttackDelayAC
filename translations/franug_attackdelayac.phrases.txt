@@ -1,0 +1,7 @@
+"Phrases"
+{
+	"DamageBlocked"
+	{
+		"en"	"[AttackDelay-AC] Damage blocked"
+	}
+}
