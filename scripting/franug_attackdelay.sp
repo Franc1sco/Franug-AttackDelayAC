@@ -22,7 +22,7 @@
 
 #pragma newdecls required
 
-#define DATA "0.2.3"
+#define DATA "0.2.4"
 
 public Plugin myinfo = 
 {
@@ -143,7 +143,7 @@ public void OnClientPutInServer(int client)
 	
 	_aEvents[client] = CreateArray(66);
 	
-	SDKHook(client, SDKHook_OnTakeDamage, OnTakeDamage);
+	SDKHook(client, SDKHook_OnTakeDamageAlive, OnTakeDamage);
 }
 
 public void OnClientDisconnect(int client)
