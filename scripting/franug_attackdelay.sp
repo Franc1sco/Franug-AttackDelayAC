@@ -22,7 +22,7 @@
 
 #pragma newdecls required
 
-#define DATA "0.2.2"
+#define DATA "0.2.3"
 
 public Plugin myinfo = 
 {
@@ -51,7 +51,7 @@ public void OnPluginStart()
 	_aWeapons = CreateArray(128);
 	_aWeaponsDelays = CreateArray();
 	
-	HookEvent("player_hurt",  Event_PlayerHurt);
+	//HookEvent("player_hurt",  Event_PlayerHurt);
 	
 	HookEvent("player_spawn", Event_PlayerSpawn);
 	
@@ -73,6 +73,7 @@ public Action Event_PlayerSpawn(Event event, const char[] sName, bool bDontBroad
 	ClearArray(_aEvents[client]);
 }
 
+/*
 public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadcast)
 {
 	int attacker = GetClientOfUserId(GetEventInt(event, "attacker"));
@@ -82,42 +83,59 @@ public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadca
 	
 	if (victim == attacker)return;
 	
+	//PrintToServer("playerhurt 1");
+	
 	char weapon[64];
 	GetEventString(event, "weapon", weapon, sizeof(weapon));
+	
+	Format(weapon, sizeof(weapon), "weapon_%s", weapon);
+	
+	//PrintToServer("weapon hurt is %s", weapon);
 	
 	int index = FindStringInArray(_aWeapons, weapon);
 	
 	if (index == -1)return;
 	
+	//PrintToServer("playerhurt 2");
+	
 	int size = GetArraySize(_aEvents[attacker]);
+	
+	//PrintToServer("playerhurt 3");
 	
 	Events events;
 	
 	int victimID = GetClientUserId(victim);
+	
+	//PrintToServer("playerhurt 4");
 	
 	if(size > 0)
 	{
 		for(int i=0;i<size;++i)
 		{
 			GetArrayArray(_aEvents[attacker], i, events);
-			
+			//PrintToServer("playerhurt 4.1");
 			if(victimID == events.userid)
 			{
+				//PrintToServer("playerhurt 4.2");
 				RemoveFromArray(_aEvents[attacker], i);
 				break;
 			}
 		}
 	}
+	//PrintToServer("playerhurt 5");
 	
 	events.userid = victimID;
 	events.weapon = weapon;
-	events.delay = GetGameTime() + GetArrayCell(_aWeaponsDelays, index);
+	events.delay = GetGameTime() + view_as<float>(GetArrayCell(_aWeaponsDelays, index));
 	
 	PushArrayArray(_aEvents[attacker], events);
+	
+	//PrintToServer("playerhurt 6");
 	
 	//SetTrieValue(_tDelays[attacker], weapon, GetGameTime()+GetArrayCell(_aWeaponsDelays, index));
 	
 }
+*/
 
 public void OnClientPutInServer(int client)
 {
@@ -133,19 +151,40 @@ public void OnClientDisconnect(int client)
 	delete _aEvents[client];
 }
 
-public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype, int &weapon, float damageForce[3], float damagePosition[3])
+public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
+	//PrintToServer("ontakedamage 0.1");
+	
 	if (!IsValidClient(attacker) || victim == attacker)return Plugin_Continue;
 	
-	if(!IsValidEntity(weapon))return Plugin_Continue;
+	//PrintToServer("ontakedamage 0.2");
 	
-	char sweapon[64];
+	char weapon[64];
 	
-	if(!GetEdictClassname(weapon, sweapon, 64))return Plugin_Continue;
+	if(attacker == inflictor)
+	{
+		GetClientWeapon(attacker, weapon, sizeof(weapon));
+	}
+	else
+	{
+		if(!IsValidEntity(inflictor))return Plugin_Continue;
+		
+		if(!GetEdictClassname(inflictor, weapon, 64))return Plugin_Continue;
+	}
 	
-	int index = FindStringInArray(_aWeapons, sweapon);
+	//PrintToServer("ontakedamage 0.3");
+	
+	//PrintToServer("ontakedamage 1");
+	
+	//PrintToServer("ontakedamage 2 with weapon %s", weapon);
+	
+	if(strlen(weapon) < 1)return Plugin_Continue;
+	
+	int index = FindStringInArray(_aWeapons, weapon);
 	
 	if (index == -1)return Plugin_Continue;
+	
+	//PrintToServer("ontakedamage 3");
 	
 	Events events;
 	
@@ -153,24 +192,46 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	
 	int size = GetArraySize(_aEvents[attacker]);
 	
-	if(size == 0)return Plugin_Continue;
+	if(size > 0){
 	
-	for(int i=0;i<size;++i)
-	{
-		GetArrayArray(_aEvents[attacker], i, events);
+		//PrintToServer("ontakedamage 4");
 		
-		if(victimID == events.userid)
+		//PrintToServer("ontakedamage 4 size %i", size);
+		for(int i=0;i<size;++i)
 		{
-			if(StrEqual(sweapon, events.weapon))
+			GetArrayArray(_aEvents[attacker], i, events);
+			//PrintToServer("ontakedamage 5");
+			//PrintToServer("ontakedamage 5 with userid %i", events.userid);
+			
+			if(victimID == events.userid)
 			{
-				if(GetGameTime()<events.delay)
+				//PrintToServer("compared %s with %s",weapon, events.weapon);
+				if(StrEqual(weapon, events.weapon))
 				{
-					PrintToChat(attacker, "%T", "DamageBlocked", attacker);
-					return Plugin_Handled;
+					//PrintToServer("time is now %f against %f", events.delay, GetGameTime());
+					if(GetGameTime()<events.delay)
+					{
+						PrintToChat(attacker, "%T", "DamageBlocked", attacker);
+						return Plugin_Handled;
+					}
 				}
 			}
 		}
+		
+		
 	}
+	
+	//PrintToServer("ontakedamage 6");
+	
+	
+	// continue then save data
+	
+	events.userid = victimID;
+	//events.weapon = weapon;
+	Format(events.weapon, 64, weapon);
+	events.delay = (GetGameTime() + view_as<float>(GetArrayCell(_aWeaponsDelays, index)));
+	
+	PushArrayArray(_aEvents[attacker], events);
 	
 	return Plugin_Continue;
 }
@@ -197,7 +258,11 @@ public void LoadKV()
 		{
 			KvGetSectionName(kv, temp, 128);
 			PushArrayString(_aWeapons, temp);
-			PushArrayCell(_aWeaponsDelays, KvGetFloat(kv, "delay"));
+			PushArrayCell(_aWeaponsDelays, view_as<float>(KvGetFloat(kv, "delay")));
+			
+			//PrintToServer("weapon %s saved with %f delay", temp, view_as<float>(KvGetFloat(kv, "delay")));
+			
+			
 			
 		} while (KvGotoNextKey(kv));
 	}
