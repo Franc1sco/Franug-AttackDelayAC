@@ -1,0 +1,11 @@
+"Config"
+{
+	"weapon_ak47"
+	{
+		"delay" "0.1"
+	}
+	"weapon_elite"
+	{
+		"delay" "0.1"
+	}
+}
