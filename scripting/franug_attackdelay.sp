@@ -22,7 +22,7 @@
 
 #pragma newdecls required
 
-#define DATA "0.2.1"
+#define DATA "0.2.2"
 
 public Plugin myinfo = 
 {
@@ -183,6 +183,9 @@ public void LoadKV()
 	{
 		SetFailState("File %s not found", sConfig);
 	}
+	
+	ClearArray(_aWeapons);
+	ClearArray(_aWeaponsDelays);
 	
 	KeyValues kv = CreateKeyValues("Config");
 	FileToKeyValues(kv, sConfig);
