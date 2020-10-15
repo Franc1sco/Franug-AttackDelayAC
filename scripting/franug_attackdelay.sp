@@ -22,7 +22,7 @@
 
 #pragma newdecls required
 
-#define DATA "0.2.4 debug"
+#define DATA "0.2.5"
 
 public Plugin myinfo = 
 {
@@ -162,11 +162,11 @@ public void OnClientDisconnect(int client)
 
 public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
-	LogToFileEx(g_sCmdLogPath, "ontakedamage 0.1");
+	//LogToFileEx(g_sCmdLogPath, "ontakedamage 0.1");
 	
 	if (!IsValidClient(attacker) || victim == attacker)return Plugin_Continue;
 	
-	LogToFileEx(g_sCmdLogPath, "ontakedamage 0.2");
+	//LogToFileEx(g_sCmdLogPath, "ontakedamage 0.2");
 	
 	char weapon[64];
 	
@@ -181,11 +181,11 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		if(!GetEdictClassname(inflictor, weapon, 64))return Plugin_Continue;
 	}
 	
-	LogToFileEx(g_sCmdLogPath, "ontakedamage 0.3");
+	//LogToFileEx(g_sCmdLogPath, "ontakedamage 0.3");
 	
-	LogToFileEx(g_sCmdLogPath, "ontakedamage 1");
+	//LogToFileEx(g_sCmdLogPath, "ontakedamage 1");
 	
-	LogToFileEx(g_sCmdLogPath, "ontakedamage 2 with weapon %s", weapon);
+	//LogToFileEx(g_sCmdLogPath, "ontakedamage 2 with weapon %s", weapon);
 	
 	if(strlen(weapon) < 1)return Plugin_Continue;
 	
@@ -193,7 +193,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	
 	if (index == -1)return Plugin_Continue;
 	
-	LogToFileEx(g_sCmdLogPath, "ontakedamage 3");
+	//LogToFileEx(g_sCmdLogPath, "ontakedamage 3");
 	
 	Events events;
 	
@@ -203,24 +203,24 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	
 	if(size > 0){
 	
-		LogToFileEx(g_sCmdLogPath, "ontakedamage 4");
+		//LogToFileEx(g_sCmdLogPath, "ontakedamage 4");
 		
-		LogToFileEx(g_sCmdLogPath, "ontakedamage 4 size %i", size);
+		//LogToFileEx(g_sCmdLogPath, "ontakedamage 4 size %i", size);
 		for(int i=0;i<size;++i)
 		{
 			GetArrayArray(_aEvents[attacker], i, events);
-			LogToFileEx(g_sCmdLogPath, "ontakedamage 5");
-			LogToFileEx(g_sCmdLogPath, "ontakedamage 5 with userid %i", events.userid);
+			//LogToFileEx(g_sCmdLogPath, "ontakedamage 5");
+			//LogToFileEx(g_sCmdLogPath, "ontakedamage 5 with userid %i", events.userid);
 			
 			if(victimID == events.userid)
 			{
-				LogToFileEx(g_sCmdLogPath, "compared %s with %s",weapon, events.weapon);
+				//LogToFileEx(g_sCmdLogPath, "compared %s with %s",weapon, events.weapon);
 				if(StrEqual(weapon, events.weapon))
 				{
-					LogToFileEx(g_sCmdLogPath, "time is now %f against %f", events.delay, GetGameTime());
+					//LogToFileEx(g_sCmdLogPath, "time is now %f against %f", events.delay, GetGameTime());
 					if(GetGameTime()<events.delay)
 					{
-						LogToFileEx(g_sCmdLogPath, "%L detected with a delay of %f", attacker, events.delay - GetGameTime());
+						LogToFileEx(g_sCmdLogPath, "Player: %L time: %f min: %f w: %s", attacker, GetGameTime(), events.delay, weapon);
 						PrintToChat(attacker, "%T", "DamageBlocked", attacker);
 						return Plugin_Handled;
 					}
@@ -231,7 +231,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		
 	}
 	
-	LogToFileEx(g_sCmdLogPath, "ontakedamage 6");
+	//LogToFileEx(g_sCmdLogPath, "ontakedamage 6");
 	
 	
 	// continue then save data
@@ -270,7 +270,7 @@ public void LoadKV()
 			PushArrayString(_aWeapons, temp);
 			PushArrayCell(_aWeaponsDelays, view_as<float>(KvGetFloat(kv, "delay")));
 			
-			LogToFileEx(g_sCmdLogPath, "weapon %s saved with %f delay", temp, view_as<float>(KvGetFloat(kv, "delay")));
+			//LogToFileEx(g_sCmdLogPath, "weapon %s saved with %f delay", temp, view_as<float>(KvGetFloat(kv, "delay")));
 			
 			
 			
