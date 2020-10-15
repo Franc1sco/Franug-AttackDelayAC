@@ -36,6 +36,8 @@ public Plugin myinfo =
 Handle _aWeapons, _aWeaponsDelays;
 Handle _aEvents[MAXPLAYERS+1];
 
+char g_sCmdLogPath[256];
+
 enum struct Events
 {
 	int userid;
@@ -45,6 +47,13 @@ enum struct Events
 
 public void OnPluginStart()
 {
+	for(int i=0;;i++)
+	{
+		BuildPath(Path_SM, g_sCmdLogPath, sizeof(g_sCmdLogPath), "logs/franug_attackdelay_%d.log", i);
+		if ( !FileExists(g_sCmdLogPath) )
+			break;
+	}
+	
 	// Load Translations.
 	LoadTranslations("franug_attackdelayac.phrases.txt");
 	
@@ -83,46 +92,46 @@ public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadca
 	
 	if (victim == attacker)return;
 	
-	//PrintToServer("playerhurt 1");
+	//LogToFileEx(g_sCmdLogPath, "playerhurt 1");
 	
 	char weapon[64];
 	GetEventString(event, "weapon", weapon, sizeof(weapon));
 	
 	Format(weapon, sizeof(weapon), "weapon_%s", weapon);
 	
-	//PrintToServer("weapon hurt is %s", weapon);
+	//LogToFileEx(g_sCmdLogPath, "weapon hurt is %s", weapon);
 	
 	int index = FindStringInArray(_aWeapons, weapon);
 	
 	if (index == -1)return;
 	
-	//PrintToServer("playerhurt 2");
+	//LogToFileEx(g_sCmdLogPath, "playerhurt 2");
 	
 	int size = GetArraySize(_aEvents[attacker]);
 	
-	//PrintToServer("playerhurt 3");
+	//LogToFileEx(g_sCmdLogPath, "playerhurt 3");
 	
 	Events events;
 	
 	int victimID = GetClientUserId(victim);
 	
-	//PrintToServer("playerhurt 4");
+	//LogToFileEx(g_sCmdLogPath, "playerhurt 4");
 	
 	if(size > 0)
 	{
 		for(int i=0;i<size;++i)
 		{
 			GetArrayArray(_aEvents[attacker], i, events);
-			//PrintToServer("playerhurt 4.1");
+			//LogToFileEx(g_sCmdLogPath, "playerhurt 4.1");
 			if(victimID == events.userid)
 			{
-				//PrintToServer("playerhurt 4.2");
+				//LogToFileEx(g_sCmdLogPath, "playerhurt 4.2");
 				RemoveFromArray(_aEvents[attacker], i);
 				break;
 			}
 		}
 	}
-	//PrintToServer("playerhurt 5");
+	//LogToFileEx(g_sCmdLogPath, "playerhurt 5");
 	
 	events.userid = victimID;
 	events.weapon = weapon;
@@ -130,7 +139,7 @@ public Action Event_PlayerHurt(Handle event, const char[] name, bool dontBroadca
 	
 	PushArrayArray(_aEvents[attacker], events);
 	
-	//PrintToServer("playerhurt 6");
+	//LogToFileEx(g_sCmdLogPath, "playerhurt 6");
 	
 	//SetTrieValue(_tDelays[attacker], weapon, GetGameTime()+GetArrayCell(_aWeaponsDelays, index));
 	
@@ -153,11 +162,11 @@ public void OnClientDisconnect(int client)
 
 public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
-	PrintToServer("ontakedamage 0.1");
+	LogToFileEx(g_sCmdLogPath, "ontakedamage 0.1");
 	
 	if (!IsValidClient(attacker) || victim == attacker)return Plugin_Continue;
 	
-	PrintToServer("ontakedamage 0.2");
+	LogToFileEx(g_sCmdLogPath, "ontakedamage 0.2");
 	
 	char weapon[64];
 	
@@ -172,11 +181,11 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		if(!GetEdictClassname(inflictor, weapon, 64))return Plugin_Continue;
 	}
 	
-	PrintToServer("ontakedamage 0.3");
+	LogToFileEx(g_sCmdLogPath, "ontakedamage 0.3");
 	
-	PrintToServer("ontakedamage 1");
+	LogToFileEx(g_sCmdLogPath, "ontakedamage 1");
 	
-	PrintToServer("ontakedamage 2 with weapon %s", weapon);
+	LogToFileEx(g_sCmdLogPath, "ontakedamage 2 with weapon %s", weapon);
 	
 	if(strlen(weapon) < 1)return Plugin_Continue;
 	
@@ -184,7 +193,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	
 	if (index == -1)return Plugin_Continue;
 	
-	PrintToServer("ontakedamage 3");
+	LogToFileEx(g_sCmdLogPath, "ontakedamage 3");
 	
 	Events events;
 	
@@ -194,23 +203,24 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	
 	if(size > 0){
 	
-		PrintToServer("ontakedamage 4");
+		LogToFileEx(g_sCmdLogPath, "ontakedamage 4");
 		
-		PrintToServer("ontakedamage 4 size %i", size);
+		LogToFileEx(g_sCmdLogPath, "ontakedamage 4 size %i", size);
 		for(int i=0;i<size;++i)
 		{
 			GetArrayArray(_aEvents[attacker], i, events);
-			PrintToServer("ontakedamage 5");
-			PrintToServer("ontakedamage 5 with userid %i", events.userid);
+			LogToFileEx(g_sCmdLogPath, "ontakedamage 5");
+			LogToFileEx(g_sCmdLogPath, "ontakedamage 5 with userid %i", events.userid);
 			
 			if(victimID == events.userid)
 			{
-				PrintToServer("compared %s with %s",weapon, events.weapon);
+				LogToFileEx(g_sCmdLogPath, "compared %s with %s",weapon, events.weapon);
 				if(StrEqual(weapon, events.weapon))
 				{
-					PrintToServer("time is now %f against %f", events.delay, GetGameTime());
+					LogToFileEx(g_sCmdLogPath, "time is now %f against %f", events.delay, GetGameTime());
 					if(GetGameTime()<events.delay)
 					{
+						LogToFileEx(g_sCmdLogPath, "%L detected with a delay of %f", attacker, events.delay - GetGameTime());
 						PrintToChat(attacker, "%T", "DamageBlocked", attacker);
 						return Plugin_Handled;
 					}
@@ -221,7 +231,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		
 	}
 	
-	PrintToServer("ontakedamage 6");
+	LogToFileEx(g_sCmdLogPath, "ontakedamage 6");
 	
 	
 	// continue then save data
@@ -260,7 +270,7 @@ public void LoadKV()
 			PushArrayString(_aWeapons, temp);
 			PushArrayCell(_aWeaponsDelays, view_as<float>(KvGetFloat(kv, "delay")));
 			
-			PrintToServer("weapon %s saved with %f delay", temp, view_as<float>(KvGetFloat(kv, "delay")));
+			LogToFileEx(g_sCmdLogPath, "weapon %s saved with %f delay", temp, view_as<float>(KvGetFloat(kv, "delay")));
 			
 			
 			
