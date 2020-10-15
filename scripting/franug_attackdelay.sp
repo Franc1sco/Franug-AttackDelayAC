@@ -22,7 +22,7 @@
 
 #pragma newdecls required
 
-#define DATA "0.2.4"
+#define DATA "0.2.4 debug"
 
 public Plugin myinfo = 
 {
@@ -153,11 +153,11 @@ public void OnClientDisconnect(int client)
 
 public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &damage, int &damagetype)
 {
-	//PrintToServer("ontakedamage 0.1");
+	PrintToServer("ontakedamage 0.1");
 	
 	if (!IsValidClient(attacker) || victim == attacker)return Plugin_Continue;
 	
-	//PrintToServer("ontakedamage 0.2");
+	PrintToServer("ontakedamage 0.2");
 	
 	char weapon[64];
 	
@@ -172,11 +172,11 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		if(!GetEdictClassname(inflictor, weapon, 64))return Plugin_Continue;
 	}
 	
-	//PrintToServer("ontakedamage 0.3");
+	PrintToServer("ontakedamage 0.3");
 	
-	//PrintToServer("ontakedamage 1");
+	PrintToServer("ontakedamage 1");
 	
-	//PrintToServer("ontakedamage 2 with weapon %s", weapon);
+	PrintToServer("ontakedamage 2 with weapon %s", weapon);
 	
 	if(strlen(weapon) < 1)return Plugin_Continue;
 	
@@ -184,7 +184,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	
 	if (index == -1)return Plugin_Continue;
 	
-	//PrintToServer("ontakedamage 3");
+	PrintToServer("ontakedamage 3");
 	
 	Events events;
 	
@@ -194,21 +194,21 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 	
 	if(size > 0){
 	
-		//PrintToServer("ontakedamage 4");
+		PrintToServer("ontakedamage 4");
 		
-		//PrintToServer("ontakedamage 4 size %i", size);
+		PrintToServer("ontakedamage 4 size %i", size);
 		for(int i=0;i<size;++i)
 		{
 			GetArrayArray(_aEvents[attacker], i, events);
-			//PrintToServer("ontakedamage 5");
-			//PrintToServer("ontakedamage 5 with userid %i", events.userid);
+			PrintToServer("ontakedamage 5");
+			PrintToServer("ontakedamage 5 with userid %i", events.userid);
 			
 			if(victimID == events.userid)
 			{
-				//PrintToServer("compared %s with %s",weapon, events.weapon);
+				PrintToServer("compared %s with %s",weapon, events.weapon);
 				if(StrEqual(weapon, events.weapon))
 				{
-					//PrintToServer("time is now %f against %f", events.delay, GetGameTime());
+					PrintToServer("time is now %f against %f", events.delay, GetGameTime());
 					if(GetGameTime()<events.delay)
 					{
 						PrintToChat(attacker, "%T", "DamageBlocked", attacker);
@@ -221,7 +221,7 @@ public Action OnTakeDamage(int victim, int &attacker, int &inflictor, float &dam
 		
 	}
 	
-	//PrintToServer("ontakedamage 6");
+	PrintToServer("ontakedamage 6");
 	
 	
 	// continue then save data
@@ -260,7 +260,7 @@ public void LoadKV()
 			PushArrayString(_aWeapons, temp);
 			PushArrayCell(_aWeaponsDelays, view_as<float>(KvGetFloat(kv, "delay")));
 			
-			//PrintToServer("weapon %s saved with %f delay", temp, view_as<float>(KvGetFloat(kv, "delay")));
+			PrintToServer("weapon %s saved with %f delay", temp, view_as<float>(KvGetFloat(kv, "delay")));
 			
 			
 			
